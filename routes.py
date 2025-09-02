@@ -8,7 +8,7 @@ from models import (User, Lead, LeadAssignment, MetaConfig, DistributionConfig,
 from auth import login_required, admin_required, get_current_user
 from meta_integration import MetaLeadsIntegration
 from lead_distributor import LeadDistributor
-from sqlalchemy import func, desc, or_
+from sqlalchemy import func, desc, or_, case
 
 @app.route('/')
 def index():
@@ -287,7 +287,7 @@ def admin_reports():
     broker_stats = db.session.query(
         User.username,
         func.count(Lead.id).label('total_leads'),
-        func.sum(func.case([(Lead.status == LeadStatus.CONVERTIDO, 1)], else_=0)).label('converted'),
+        func.sum(case((Lead.status == LeadStatus.CONVERTIDO, 1), else_=0)).label('converted'),
         func.avg(
             func.extract('epoch', Lead.updated_at) - func.extract('epoch', Lead.created_at)
         ).label('avg_response_time')
@@ -327,8 +327,8 @@ def export_reports():
         User.username,
         User.email,
         func.count(Lead.id).label('total_leads'),
-        func.sum(func.case([(Lead.status == LeadStatus.CONVERTIDO, 1)], else_=0)).label('converted'),
-        func.sum(func.case([(Lead.status == LeadStatus.PERDIDO, 1)], else_=0)).label('lost')
+        func.sum(case((Lead.status == LeadStatus.CONVERTIDO, 1), else_=0)).label('converted'),
+        func.sum(case((Lead.status == LeadStatus.PERDIDO, 1), else_=0)).label('lost')
     ).select_from(User)\
      .outerjoin(Lead, User.id == Lead.assigned_to)\
      .filter(User.role == UserRole.BROKER)\
