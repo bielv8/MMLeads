@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Lead: {{ lead.name }} - Lead Management System{% endblock %}
+{% block title %}Lead: {{ lead.name }} - MM Conecta Leads{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-user me-2"></i>{{ lead.name }}</h1>
     <div class="d-flex gap-2">
         <a href="{{ url_for('broker_leads') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Leads
+            <i class="fas fa-arrow-left me-2"></i>Voltar aos Leads
         </a>
     </div>
 </div>
@@ -17,11 +17,11 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-info-circle me-2"></i>Lead Information</h5>
+                <h5><i class="fas fa-info-circle me-2"></i>Informações do Lead</h5>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
-                    <div class="col-sm-4"><strong>Name:</strong></div>
+                    <div class="col-sm-4"><strong>Nome:</strong></div>
                     <div class="col-sm-8">{{ lead.name }}</div>
                 </div>
                 
@@ -31,18 +31,18 @@
                         {% if lead.email %}
                             <a href="mailto:{{ lead.email }}">{{ lead.email }}</a>
                         {% else %}
-                            <span class="text-muted">Not provided</span>
+                            <span class="text-muted">Não informado</span>
                         {% endif %}
                     </div>
                 </div>
                 
                 <div class="row mb-3">
-                    <div class="col-sm-4"><strong>Phone:</strong></div>
+                    <div class="col-sm-4"><strong>Telefone:</strong></div>
                     <div class="col-sm-8">
                         {% if lead.phone %}
                             <a href="tel:{{ lead.phone }}">{{ lead.phone }}</a>
                         {% else %}
-                            <span class="text-muted">Not provided</span>
+                            <span class="text-muted">Não informado</span>
                         {% endif %}
                     </div>
                 </div>
@@ -57,12 +57,12 @@
                 </div>
                 
                 <div class="row mb-3">
-                    <div class="col-sm-4"><strong>Received:</strong></div>
+                    <div class="col-sm-4"><strong>Recebido:</strong></div>
                     <div class="col-sm-8">{{ lead.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
                 </div>
                 
                 <div class="row mb-3">
-                    <div class="col-sm-4"><strong>Last Updated:</strong></div>
+                    <div class="col-sm-4"><strong>Última Atualização:</strong></div>
                     <div class="col-sm-8">{{ lead.updated_at.strftime('%Y-%m-%d %H:%M') }}</div>
                 </div>
                 
@@ -80,7 +80,7 @@
                 
                 {% if lead.message %}
                     <div class="row mb-3">
-                        <div class="col-sm-4"><strong>Message:</strong></div>
+                        <div class="col-sm-4"><strong>Mensagem:</strong></div>
                         <div class="col-sm-8">
                             <div class="alert alert-light">
                                 {{ lead.message }}
@@ -94,24 +94,24 @@
         <!-- Quick Actions -->
         <div class="card mt-4">
             <div class="card-header">
-                <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                <h5><i class="fas fa-bolt me-2"></i>Ações Rápidas</h5>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
                     {% if lead.email %}
                         <a href="mailto:{{ lead.email }}?subject=Real Estate Inquiry" class="btn btn-outline-primary">
-                            <i class="fas fa-envelope me-2"></i>Send Email
+                            <i class="fas fa-envelope me-2"></i>Enviar Email
                         </a>
                     {% endif %}
                     
                     {% if lead.phone %}
                         <a href="tel:{{ lead.phone }}" class="btn btn-outline-success">
-                            <i class="fas fa-phone me-2"></i>Call Now
+                            <i class="fas fa-phone me-2"></i>Ligar Agora
                         </a>
                     {% endif %}
                     
                     <button class="btn btn-outline-info" onclick="document.getElementById('status').focus()">
-                        <i class="fas fa-edit me-2"></i>Update Status
+                        <i class="fas fa-edit me-2"></i>Atualizar Status
                     </button>
                 </div>
             </div>
@@ -122,7 +122,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-edit me-2"></i>Update Lead</h5>
+                <h5><i class="fas fa-edit me-2"></i>Atualizar Lead</h5>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('update_lead', lead_id=lead.id) }}">
@@ -137,20 +137,20 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="notes" class="form-label">Notes</label>
+                        <label for="notes" class="form-label">Notas</label>
                         <textarea class="form-control" name="notes" id="notes" rows="6" 
-                                  placeholder="Add your notes about this lead...">{{ lead.notes or '' }}</textarea>
+                                  placeholder="Adicione suas notas sobre este lead...">{{ lead.notes or '' }}</textarea>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="follow_up_date" class="form-label">Follow-up Date & Time</label>
+                        <label for="follow_up_date" class="form-label">Data e Hora do Follow-up</label>
                         <input type="datetime-local" class="form-control" name="follow_up_date" id="follow_up_date"
                                value="{{ lead.follow_up_date.strftime('%Y-%m-%dT%H:%M') if lead.follow_up_date else '' }}">
-                        <div class="form-text">Set a reminder for follow-up contact</div>
+                        <div class="form-text">Defina um lembrete para o próximo contato</div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Update Lead
+                        <i class="fas fa-save me-2"></i>Atualizar Lead
                     </button>
                 </form>
             </div>
@@ -159,7 +159,7 @@
         {% if lead.notes %}
             <div class="card mt-4">
                 <div class="card-header">
-                    <h5><i class="fas fa-sticky-note me-2"></i>Current Notes</h5>
+                    <h5><i class="fas fa-sticky-note me-2"></i>Notas Atuais</h5>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
@@ -176,14 +176,14 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-history me-2"></i>Lead History</h5>
+                <h5><i class="fas fa-history me-2"></i>Histórico do Lead</h5>
             </div>
             <div class="card-body">
                 <div class="timeline">
                     <div class="timeline-item">
                         <div class="timeline-marker bg-primary"></div>
                         <div class="timeline-content">
-                            <h6>Lead Received</h6>
+                            <h6>Lead Recebido</h6>
                             <p class="text-muted mb-0">{{ lead.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
                         </div>
                     </div>
@@ -192,7 +192,7 @@
                         <div class="timeline-item">
                             <div class="timeline-marker bg-info"></div>
                             <div class="timeline-content">
-                                <h6>Last Updated</h6>
+                                <h6>Última Atualização</h6>
                                 <p class="text-muted mb-0">
                                     {{ lead.updated_at.strftime('%Y-%m-%d %H:%M') }}
                                     <br>Status: {{ lead.status.value.replace('_', ' ').title() }}
@@ -205,7 +205,7 @@
                         <div class="timeline-item">
                             <div class="timeline-marker bg-warning"></div>
                             <div class="timeline-content">
-                                <h6>Scheduled Follow-up</h6>
+                                <h6>Follow-up Agendado</h6>
                                 <p class="text-muted mb-0">{{ lead.follow_up_date.strftime('%Y-%m-%d %H:%M') }}</p>
                             </div>
                         </div>

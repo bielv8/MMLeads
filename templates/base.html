@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Lead Management System{% endblock %}</title>
+    <title>{% block title %}MM Conecta Leads{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
@@ -23,7 +23,7 @@
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
                 <i class="fas fa-home me-2"></i>
-                Lead Management
+                MM Conecta Leads
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -36,38 +36,38 @@
                         {% if session.user_role == 'admin' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
-                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                    <i class="fas fa-tachometer-alt me-1"></i>Painel
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin_users') }}">
-                                    <i class="fas fa-users me-1"></i>Users
+                                    <i class="fas fa-users me-1"></i>Usuários
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin_meta_config') }}">
-                                    <i class="fas fa-cog me-1"></i>Meta Config
+                                    <i class="fas fa-cog me-1"></i>Config Meta
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin_distribution') }}">
-                                    <i class="fas fa-share-alt me-1"></i>Distribution
+                                    <i class="fas fa-share-alt me-1"></i>Distribuição
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('admin_reports') }}">
-                                    <i class="fas fa-chart-bar me-1"></i>Reports
+                                    <i class="fas fa-chart-bar me-1"></i>Relatórios
                                 </a>
                             </li>
                         {% else %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('broker_dashboard') }}">
-                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                    <i class="fas fa-tachometer-alt me-1"></i>Painel
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('broker_leads') }}">
-                                    <i class="fas fa-list me-1"></i>My Leads
+                                    <i class="fas fa-list me-1"></i>Meus Leads
                                 </a>
                             </li>
                         {% endif %}
@@ -85,7 +85,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('logout') }}">
-                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                <i class="fas fa-sign-out-alt me-1"></i>Sair
                             </a>
                         </li>
                     </ul>

@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - Lead Management System{% endblock %}
+{% block title %}Painel Administrativo - MM Conecta Leads{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
+    <h1><i class="fas fa-tachometer-alt me-2"></i>Painel Administrativo</h1>
     <div class="text-muted">
         <i class="fas fa-clock me-1"></i>
         {% if last_sync %}
-            Last sync: {{ last_sync.strftime('%Y-%m-%d %H:%M') }}
+            Última sincronização: {{ last_sync.strftime('%d/%m/%Y %H:%M') }}
         {% else %}
-            Never synced
+            Nunca sincronizado
         {% endif %}
     </div>
 </div>
@@ -23,7 +23,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ total_leads }}</h3>
-                        <p class="card-text">Total Leads</p>
+                        <p class="card-text">Total de Leads</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-users fa-2x"></i>
@@ -39,7 +39,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ active_brokers }}</h3>
-                        <p class="card-text">Active Brokers</p>
+                        <p class="card-text">Corretores Ativos</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-user-check fa-2x"></i>
@@ -55,7 +55,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ total_brokers }}</h3>
-                        <p class="card-text">Total Brokers</p>
+                        <p class="card-text">Total de Corretores</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-user-friends fa-2x"></i>
@@ -75,7 +75,7 @@
                                 {% if status.value == 'novo' %}{{ count }}{% endif %}
                             {% endfor %}
                         </h3>
-                        <p class="card-text">New Leads</p>
+                        <p class="card-text">Novos Leads</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-exclamation-circle fa-2x"></i>
@@ -91,7 +91,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-chart-pie me-2"></i>Lead Status Distribution</h5>
+                <h5><i class="fas fa-chart-pie me-2"></i>Distribuição de Status dos Leads</h5>
             </div>
             <div class="card-body">
                 <canvas id="statusChart" width="400" height="200"></canvas>
@@ -102,7 +102,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-list me-2"></i>Recent Leads</h5>
+                <h5><i class="fas fa-list me-2"></i>Leads Recentes</h5>
             </div>
             <div class="card-body">
                 {% if recent_leads %}
@@ -120,14 +120,14 @@
                                         {{ lead.status.value.replace('_', ' ').title() }}
                                     </span>
                                     {% if lead.assigned_broker %}
-                                        | Assigned to: {{ lead.assigned_broker.username }}
+                                        | Atribuído a: {{ lead.assigned_broker.username }}
                                     {% endif %}
                                 </small>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="text-muted">No leads found</p>
+                    <p class="text-muted">Nenhum lead encontrado</p>
                 {% endif %}
             </div>
         </div>
@@ -139,32 +139,32 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                <h5><i class="fas fa-bolt me-2"></i>Ações Rápidas</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary w-100">
                             <i class="fas fa-users me-2"></i>
-                            Manage Users
+                            Gerenciar Usuários
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{{ url_for('admin_meta_config') }}" class="btn btn-outline-info w-100">
                             <i class="fas fa-cog me-2"></i>
-                            Meta Config
+                            Config Meta
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{{ url_for('admin_distribution') }}" class="btn btn-outline-success w-100">
                             <i class="fas fa-share-alt me-2"></i>
-                            Distribution
+                            Distribuição
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-warning w-100">
                             <i class="fas fa-chart-bar me-2"></i>
-                            View Reports
+                            Ver Relatórios
                         </a>
                     </div>
                 </div>

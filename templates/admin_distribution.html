@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Lead Distribution - Lead Management System{% endblock %}
+{% block title %}Distribuição de Leads - MM Conecta Leads{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-share-alt me-2"></i>Lead Distribution</h1>
+    <h1><i class="fas fa-share-alt me-2"></i>Distribuição de Leads</h1>
 </div>
 
 <div class="row">
@@ -12,28 +12,28 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-cog me-2"></i>Distribution Settings</h5>
+                <h5><i class="fas fa-cog me-2"></i>Configurações de Distribuição</h5>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('save_distribution_config') }}">
                     <div class="mb-3">
-                        <label for="mode" class="form-label">Distribution Mode</label>
+                        <label for="mode" class="form-label">Modo de Distribuição</label>
                         <select class="form-select" name="mode" id="mode" required onchange="toggleManualOrder()">
                             <option value="round_robin" {{ 'selected' if config and config.mode.value == 'round_robin' }}>
-                                Round Robin (Automatic Rotation)
+                                Round Robin (Rotação Automática)
                             </option>
                             <option value="manual" {{ 'selected' if config and config.mode.value == 'manual' }}>
-                                Manual Order (Fixed Priority)
+                                Ordem Manual (Prioridade Fixa)
                             </option>
                         </select>
                         <div class="form-text">
-                            Round Robin distributes leads equally among active brokers. 
-                            Manual Order follows your specified priority list.
+                            Round Robin distribui leads igualmente entre corretores ativos. 
+                            Ordem Manual segue sua lista de prioridade especificada.
                         </div>
                     </div>
                     
                     <div class="mb-3" id="manualOrderSection" style="display: none;">
-                        <label class="form-label">Broker Priority Order</label>
+                        <label class="form-label">Ordem de Prioridade dos Corretores</label>
                         <div id="brokerOrderList">
                             {% if config and config.broker_order %}
                                 {% for broker_id in config.broker_order %}
@@ -55,13 +55,13 @@
                         
                         <div class="mt-2">
                             <select id="brokerSelect" class="form-select">
-                                <option value="">Select broker to add...</option>
+                                <option value="">Selecione corretor para adicionar...</option>
                                 {% for broker in brokers %}
                                     <option value="{{ broker.id }}">{{ broker.username }}</option>
                                 {% endfor %}
                             </select>
                             <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addBrokerToOrder()">
-                                <i class="fas fa-plus me-1"></i>Add Broker
+                                <i class="fas fa-plus me-1"></i>Adicionar Corretor
                             </button>
                         </div>
                     </div>
@@ -71,16 +71,16 @@
                             <input class="form-check-input" type="checkbox" name="skip_inactive" id="skip_inactive" 
                                    {{ 'checked' if config and config.skip_inactive }}>
                             <label class="form-check-label" for="skip_inactive">
-                                Skip inactive brokers
+                                Pular corretores inativos
                             </label>
                             <div class="form-text">
-                                Automatically skip brokers who are marked as inactive or cannot receive leads
+                                Pular automaticamente corretores marcados como inativos ou que não podem receber leads
                             </div>
                         </div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Save Configuration
+                        <i class="fas fa-save me-2"></i>Salvar Configuração
                     </button>
                 </form>
             </div>
@@ -91,7 +91,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-users me-2"></i>Available Brokers</h5>
+                <h5><i class="fas fa-users me-2"></i>Corretores Disponíveis</h5>
             </div>
             <div class="card-body">
                 {% if brokers %}
@@ -99,9 +99,9 @@
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Broker</th>
+                                    <th>Corretor</th>
                                     <th>Status</th>
-                                    <th>Can Receive</th>
+                                    <th>Pode Receber</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,7 +110,7 @@
                                         <td>{{ broker.username }}</td>
                                         <td>
                                             <span class="badge bg-{{ 'success' if broker.is_active else 'danger' }}">
-                                                {{ 'Active' if broker.is_active else 'Inactive' }}
+                                                {{ 'Ativo' if broker.is_active else 'Inativo' }}
                                             </span>
                                         </td>
                                         <td>
@@ -122,7 +122,7 @@
                         </table>
                     </div>
                 {% else %}
-                    <p class="text-muted">No brokers available</p>
+                    <p class="text-muted">Nenhum corretor disponível</p>
                 {% endif %}
             </div>
         </div>
@@ -134,7 +134,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-history me-2"></i>Recent Lead Assignments</h5>
+                <h5><i class="fas fa-history me-2"></i>Atribuições Recentes de Leads</h5>
             </div>
             <div class="card-body">
                 {% if assignments %}
@@ -143,8 +143,8 @@
                             <thead>
                                 <tr>
                                     <th>Lead</th>
-                                    <th>Broker</th>
-                                    <th>Assigned</th>
+                                    <th>Corretor</th>
+                                    <th>Atribuído</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -165,7 +165,7 @@
                         </table>
                     </div>
                 {% else %}
-                    <p class="text-muted">No assignments found</p>
+                    <p class="text-muted">Nenhuma atribuição encontrada</p>
                 {% endif %}
             </div>
         </div>

@@ -39,7 +39,7 @@ def login():
             else:
                 return redirect(url_for('broker_dashboard'))
         else:
-            flash('Invalid username or password', 'danger')
+            flash('Usuário ou senha inválidos', 'danger')
     
     return render_template('login.html')
 
@@ -47,7 +47,7 @@ def login():
 def logout():
     """User logout"""
     session.clear()
-    flash('You have been logged out', 'info')
+    flash('Você foi desconectado', 'info')
     return redirect(url_for('login'))
 
 # Admin Routes
@@ -100,11 +100,11 @@ def create_user():
         
         # Check if user already exists
         if User.query.filter_by(username=username).first():
-            flash('Username already exists', 'danger')
+            flash('Usuário já existe', 'danger')
             return redirect(url_for('admin_users'))
         
         if User.query.filter_by(email=email).first():
-            flash('Email already exists', 'danger')
+            flash('Email já existe', 'danger')
             return redirect(url_for('admin_users'))
         
         user = User(
@@ -119,10 +119,10 @@ def create_user():
         db.session.add(user)
         db.session.commit()
         
-        flash(f'User {username} created successfully', 'success')
+        flash(f'Usuário {username} criado com sucesso', 'success')
         
     except Exception as e:
-        flash(f'Error creating user: {str(e)}', 'danger')
+        flash(f'Erro ao criar usuário: {str(e)}', 'danger')
         db.session.rollback()
     
     return redirect(url_for('admin_users'))
@@ -143,10 +143,10 @@ def edit_user(user_id):
             user.set_password(request.form['password'])
         
         db.session.commit()
-        flash(f'User {user.username} updated successfully', 'success')
+        flash(f'Usuário {user.username} atualizado com sucesso', 'success')
         
     except Exception as e:
-        flash(f'Error updating user: {str(e)}', 'danger')
+        flash(f'Erro ao atualizar usuário: {str(e)}', 'danger')
         db.session.rollback()
     
     return redirect(url_for('admin_users'))
@@ -162,10 +162,10 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         
-        flash(f'User {username} deleted successfully', 'success')
+        flash(f'Usuário {username} excluído com sucesso', 'success')
         
     except Exception as e:
-        flash(f'Error deleting user: {str(e)}', 'danger')
+        flash(f'Erro ao excluir usuário: {str(e)}', 'danger')
         db.session.rollback()
     
     return redirect(url_for('admin_users'))
@@ -205,10 +205,10 @@ def save_meta_config():
         meta_integration_instance = MetaLeadsIntegration()
         meta_integration_instance.load_config()
         
-        flash('Meta API configuration saved successfully', 'success')
+        flash('Configuração da API Meta salva com sucesso', 'success')
         
     except Exception as e:
-        flash(f'Error saving configuration: {str(e)}', 'danger')
+        flash(f'Erro ao salvar configuração: {str(e)}', 'danger')
         db.session.rollback()
     
     return redirect(url_for('admin_meta_config'))
@@ -221,9 +221,9 @@ def test_meta_connection():
     success, message = meta_integration_instance.test_connection()
     
     if success:
-        flash(f'Connection successful: {message}', 'success')
+        flash(f'Conexão bem-sucedida: {message}', 'success')
     else:
-        flash(f'Connection failed: {message}', 'danger')
+        flash(f'Falha na conexão: {message}', 'danger')
     
     return redirect(url_for('admin_meta_config'))
 
@@ -259,10 +259,10 @@ def save_distribution_config():
         lead_distributor_instance = LeadDistributor()
         lead_distributor_instance.update_distribution_config(mode, broker_order, skip_inactive)
         
-        flash('Distribution configuration saved successfully', 'success')
+        flash('Configuração de distribuição salva com sucesso', 'success')
         
     except Exception as e:
-        flash(f'Error saving configuration: {str(e)}', 'danger')
+        flash(f'Erro ao salvar configuração: {str(e)}', 'danger')
     
     return redirect(url_for('admin_distribution'))
 
@@ -289,9 +289,10 @@ def admin_reports():
         func.avg(
             func.extract('epoch', Lead.updated_at) - func.extract('epoch', Lead.created_at)
         ).label('avg_response_time')
-    ).join(Lead, User.id == Lead.assigned_to, isouter=True)\
+    ).select_from(User)\
+     .join(Lead, User.id == Lead.assigned_to, isouter=True)\
      .filter(User.role == UserRole.BROKER)\
-     .filter(Lead.created_at >= start_date)\
+     .filter(or_(Lead.created_at >= start_date, Lead.created_at.is_(None)))\
      .group_by(User.id, User.username).all()
     
     # Lead trends (daily)
@@ -326,9 +327,10 @@ def export_reports():
         func.count(Lead.id).label('total_leads'),
         func.sum(func.case([(Lead.status == LeadStatus.CONVERTIDO, 1)], else_=0)).label('converted'),
         func.sum(func.case([(Lead.status == LeadStatus.PERDIDO, 1)], else_=0)).label('lost')
-    ).join(Lead, User.id == Lead.assigned_to, isouter=True)\
+    ).select_from(User)\
+     .join(Lead, User.id == Lead.assigned_to, isouter=True)\
      .filter(User.role == UserRole.BROKER)\
-     .filter(Lead.created_at >= start_date)\
+     .filter(or_(Lead.created_at >= start_date, Lead.created_at.is_(None)))\
      .group_by(User.id, User.username, User.email).all()
     
     # Create CSV
@@ -433,10 +435,10 @@ def update_lead(lead_id):
         lead.updated_at = datetime.utcnow()
         db.session.commit()
         
-        flash('Lead updated successfully', 'success')
+        flash('Lead atualizado com sucesso', 'success')
         
     except Exception as e:
-        flash(f'Error updating lead: {str(e)}', 'danger')
+        flash(f'Erro ao atualizar lead: {str(e)}', 'danger')
         db.session.rollback()
     
     return redirect(url_for('lead_detail', lead_id=lead_id))
@@ -460,7 +462,7 @@ def get_notifications():
         if new_leads_count > 0:
             notifications.append({
                 'type': 'new_leads',
-                'message': f'You have {new_leads_count} new leads',
+                'message': f'Você tem {new_leads_count} novos leads',
                 'count': new_leads_count
             })
         
@@ -472,7 +474,7 @@ def get_notifications():
         if upcoming_count > 0:
             notifications.append({
                 'type': 'follow_ups',
-                'message': f'{upcoming_count} follow-ups due soon',
+                'message': f'{upcoming_count} follow-ups próximos',
                 'count': upcoming_count
             })
     

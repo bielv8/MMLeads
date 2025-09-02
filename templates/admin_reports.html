@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Reports & Analytics - Lead Management System{% endblock %}
+{% block title %}Relatórios e Análises - MM Conecta Leads{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-chart-bar me-2"></i>Reports & Analytics</h1>
+    <h1><i class="fas fa-chart-bar me-2"></i>Relatórios e Análises</h1>
     <div class="d-flex gap-2">
         <div class="btn-group" role="group">
-            <a href="{{ url_for('admin_reports', days=7) }}" class="btn btn-outline-secondary {{ 'active' if days == 7 }}">7 Days</a>
-            <a href="{{ url_for('admin_reports', days=30) }}" class="btn btn-outline-secondary {{ 'active' if days == 30 }}">30 Days</a>
-            <a href="{{ url_for('admin_reports', days=90) }}" class="btn btn-outline-secondary {{ 'active' if days == 90 }}">90 Days</a>
+            <a href="{{ url_for('admin_reports', days=7) }}" class="btn btn-outline-secondary {{ 'active' if days == 7 }}">7 Dias</a>
+            <a href="{{ url_for('admin_reports', days=30) }}" class="btn btn-outline-secondary {{ 'active' if days == 30 }}">30 Dias</a>
+            <a href="{{ url_for('admin_reports', days=90) }}" class="btn btn-outline-secondary {{ 'active' if days == 90 }}">90 Dias</a>
         </div>
         <a href="{{ url_for('export_reports', days=days) }}" class="btn btn-success">
-            <i class="fas fa-download me-2"></i>Export CSV
+            <i class="fas fa-download me-2"></i>Exportar CSV
         </a>
     </div>
 </div>
@@ -25,7 +25,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ total_leads }}</h3>
-                        <p class="card-text">Total Leads</p>
+                        <p class="card-text">Total de Leads</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-users fa-2x"></i>
@@ -41,7 +41,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ converted_leads }}</h3>
-                        <p class="card-text">Converted</p>
+                        <p class="card-text">Convertidos</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-check-circle fa-2x"></i>
@@ -57,7 +57,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ "%.1f"|format(conversion_rate) }}%</h3>
-                        <p class="card-text">Conversion Rate</p>
+                        <p class="card-text">Taxa de Conversão</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-percentage fa-2x"></i>
@@ -73,7 +73,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ days }}</h3>
-                        <p class="card-text">Days Period</p>
+                        <p class="card-text">Período em Dias</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-calendar fa-2x"></i>
@@ -89,7 +89,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-chart-line me-2"></i>Daily Lead Trends</h5>
+                <h5><i class="fas fa-chart-line me-2"></i>Tendências Diárias de Leads</h5>
             </div>
             <div class="card-body">
                 <canvas id="leadsChart" width="400" height="200"></canvas>
@@ -100,18 +100,18 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-trophy me-2"></i>Top Performers</h5>
+                <h5><i class="fas fa-trophy me-2"></i>Melhores Performances</h5>
             </div>
             <div class="card-body">
                 {% if broker_stats %}
                     {% for stat in broker_stats[:5] %}
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span>{{ stat.username }}</span>
-                            <span class="badge bg-primary">{{ stat.converted or 0 }} conversions</span>
+                            <span class="badge bg-primary">{{ stat.converted or 0 }} conversões</span>
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-muted">No data available</p>
+                    <p class="text-muted">Nenhum dado disponível</p>
                 {% endif %}
             </div>
         </div>
@@ -123,7 +123,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-users me-2"></i>Broker Performance</h5>
+                <h5><i class="fas fa-users me-2"></i>Performance dos Corretores</h5>
             </div>
             <div class="card-body">
                 {% if broker_stats %}
@@ -131,11 +131,11 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Broker</th>
-                                    <th>Total Leads</th>
-                                    <th>Converted</th>
-                                    <th>Conversion Rate</th>
-                                    <th>Avg Response Time</th>
+                                    <th>Corretor</th>
+                                    <th>Total de Leads</th>
+                                    <th>Convertidos</th>
+                                    <th>Taxa de Conversão</th>
+                                    <th>Tempo Médio de Resposta</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -164,7 +164,7 @@
                         </table>
                     </div>
                 {% else %}
-                    <p class="text-muted">No performance data available</p>
+                    <p class="text-muted">Nenhum dado de performance disponível</p>
                 {% endif %}
             </div>
         </div>

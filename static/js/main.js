@@ -1,4 +1,4 @@
-// Main JavaScript for Lead Management System
+// JavaScript principal para MM Conecta Leads
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -93,11 +93,11 @@ function updateNotificationUI(notifications) {
         const markAllItem = document.createElement('li');
         const markAllLink = document.createElement('a');
         markAllLink.className = 'dropdown-item text-center text-muted';
-        markAllLink.innerHTML = '<small>Notifications update automatically</small>';
+        markAllLink.innerHTML = '<small>Notificações são atualizadas automaticamente</small>';
         markAllItem.appendChild(markAllLink);
         dropdown.appendChild(markAllItem);
     } else {
-        dropdown.innerHTML = '<li><span class="dropdown-item-text text-muted">No new notifications</span></li>';
+        dropdown.innerHTML = '<li><span class="dropdown-item-text text-muted">Nenhuma nova notificação</span></li>';
     }
 }
 
@@ -121,7 +121,7 @@ function enhanceFormValidation() {
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
                 submitBtn.disabled = true;
                 
                 // Re-enable button after 5 seconds as fallback
@@ -227,16 +227,16 @@ function updateLeadStatus(leadId, status) {
     })
     .then(response => {
         if (response.ok) {
-            showToast('Lead status updated successfully', 'success');
+            showToast('Status do lead atualizado com sucesso', 'success');
             // Reload page to show updated status
             setTimeout(() => window.location.reload(), 1000);
         } else {
-            showToast('Failed to update lead status', 'danger');
+            showToast('Falha ao atualizar status do lead', 'danger');
         }
     })
     .catch(error => {
         console.error('Error updating lead:', error);
-        showToast('Error updating lead status', 'danger');
+        showToast('Erro ao atualizar status do lead', 'danger');
     });
 }
 
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteButtons = document.querySelectorAll('button[onclick*="delete"], form[action*="delete"] button[type="submit"]');
     deleteButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+            if (!confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
                 e.preventDefault();
                 return false;
             }
@@ -291,10 +291,10 @@ function printPage() {
 // Copy to clipboard functionality
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
-        showToast('Copied to clipboard', 'success');
+        showToast('Copiado para a área de transferência', 'success');
     }).catch(function(err) {
         console.error('Could not copy text: ', err);
-        showToast('Failed to copy to clipboard', 'danger');
+        showToast('Falha ao copiar para a área de transferência', 'danger');
     });
 }
 
@@ -312,10 +312,10 @@ function formatRelativeTime(dateString) {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
     
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minutes ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffMins < 1) return 'Agora mesmo';
+    if (diffMins < 60) return `${diffMins} minutos atrás`;
+    if (diffHours < 24) return `${diffHours} horas atrás`;
+    if (diffDays < 7) return `${diffDays} dias atrás`;
     return date.toLocaleDateString();
 }
 

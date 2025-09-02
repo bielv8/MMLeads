@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}My Leads - Lead Management System{% endblock %}
+{% block title %}Meus Leads - MM Conecta Leads{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-list me-2"></i>My Leads</h1>
+    <h1><i class="fas fa-list me-2"></i>Meus Leads</h1>
     <div class="d-flex gap-2">
         <!-- Status Filter -->
         <div class="btn-group" role="group">
             <a href="{{ url_for('broker_leads') }}" class="btn btn-outline-secondary {{ 'active' if not current_status }}">
-                All
+                Todos
             </a>
             <a href="{{ url_for('broker_leads', status='novo') }}" class="btn btn-outline-warning {{ 'active' if current_status == 'novo' }}">
-                New
+                Novos
             </a>
             <a href="{{ url_for('broker_leads', status='em_contato') }}" class="btn btn-outline-info {{ 'active' if current_status == 'em_contato' }}">
-                In Contact
+                Em Contato
             </a>
             <a href="{{ url_for('broker_leads', status='convertido') }}" class="btn btn-outline-success {{ 'active' if current_status == 'convertido' }}">
-                Converted
+                Convertidos
             </a>
             <a href="{{ url_for('broker_leads', status='perdido') }}" class="btn btn-outline-danger {{ 'active' if current_status == 'perdido' }}">
-                Lost
+                Perdidos
             </a>
         </div>
     </div>
@@ -35,13 +35,13 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>Nome</th>
                             <th>Email</th>
-                            <th>Phone</th>
+                            <th>Telefone</th>
                             <th>Status</th>
-                            <th>Received</th>
-                            <th>Last Updated</th>
-                            <th>Actions</th>
+                            <th>Recebido</th>
+                            <th>Última Atualização</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,7 +64,7 @@
                                 <td>{{ lead.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
                                 <td>
                                     <a href="{{ url_for('lead_detail', lead_id=lead.id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i> View
+                                        <i class="fas fa-eye"></i> Ver
                                     </a>
                                 </td>
                             </tr>
@@ -75,16 +75,16 @@
         {% else %}
             <div class="text-center py-5">
                 <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-                <h4 class="text-muted">No leads found</h4>
+                <h4 class="text-muted">Nenhum lead encontrado</h4>
                 <p class="text-muted">
                     {% if current_status %}
-                        No leads with status "{{ current_status.replace('_', ' ').title() }}" found.
+                        Nenhum lead com status "{{ current_status.replace('_', ' ').title() }}" encontrado.
                     {% else %}
-                        You haven't been assigned any leads yet.
+                        Você ainda não tem leads atribuídos.
                     {% endif %}
                 </p>
                 <a href="{{ url_for('broker_leads') }}" class="btn btn-primary">
-                    <i class="fas fa-refresh me-2"></i>View All Leads
+                    <i class="fas fa-refresh me-2"></i>Ver Todos os Leads
                 </a>
             </div>
         {% endif %}
