@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Lead Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
+    <div class="text-muted">
+        <i class="fas fa-clock me-1"></i>
+        {% if last_sync %}
+            Last sync: {{ last_sync.strftime('%Y-%m-%d %H:%M') }}
+        {% else %}
+            Never synced
+        {% endif %}
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ total_leads }}</h3>
+                        <p class="card-text">Total Leads</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ active_brokers }}</h3>
+                        <p class="card-text">Active Brokers</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-check fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ total_brokers }}</h3>
+                        <p class="card-text">Total Brokers</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-friends fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">
+                            {% for status, count in status_counts %}
+                                {% if status.value == 'novo' %}{{ count }}{% endif %}
+                            {% endfor %}
+                        </h3>
+                        <p class="card-text">New Leads</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lead Status Chart -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie me-2"></i>Lead Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list me-2"></i>Recent Leads</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_leads %}
+                    <div class="list-group">
+                        {% for lead in recent_leads %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ lead.name }}</h6>
+                                    <small>{{ lead.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1">{{ lead.email or 'No email' }}</p>
+                                <small>
+                                    Status: 
+                                    <span class="badge bg-{{ 'success' if lead.status.value == 'convertido' else 'warning' if lead.status.value == 'novo' else 'secondary' }}">
+                                        {{ lead.status.value.replace('_', ' ').title() }}
+                                    </span>
+                                    {% if lead.assigned_broker %}
+                                        | Assigned to: {{ lead.assigned_broker.username }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No leads found</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-users me-2"></i>
+                            Manage Users
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('admin_meta_config') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-cog me-2"></i>
+                            Meta Config
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('admin_distribution') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-share-alt me-2"></i>
+                            Distribution
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Lead Status Chart
+const statusData = {
+    labels: [
+        {% for status, count in status_counts %}
+            '{{ status.value.replace("_", " ").title() }}'{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    datasets: [{
+        data: [
+            {% for status, count in status_counts %}
+                {{ count }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        backgroundColor: [
+            '#17a2b8', // info
+            '#ffc107', // warning
+            '#28a745', // success
+            '#dc3545', // danger
+        ]
+    }]
+};
+
+const statusChart = new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: statusData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

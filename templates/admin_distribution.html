@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Distribution - Lead Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-share-alt me-2"></i>Lead Distribution</h1>
+</div>
+
+<div class="row">
+    <!-- Distribution Configuration -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cog me-2"></i>Distribution Settings</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('save_distribution_config') }}">
+                    <div class="mb-3">
+                        <label for="mode" class="form-label">Distribution Mode</label>
+                        <select class="form-select" name="mode" id="mode" required onchange="toggleManualOrder()">
+                            <option value="round_robin" {{ 'selected' if config and config.mode.value == 'round_robin' }}>
+                                Round Robin (Automatic Rotation)
+                            </option>
+                            <option value="manual" {{ 'selected' if config and config.mode.value == 'manual' }}>
+                                Manual Order (Fixed Priority)
+                            </option>
+                        </select>
+                        <div class="form-text">
+                            Round Robin distributes leads equally among active brokers. 
+                            Manual Order follows your specified priority list.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="manualOrderSection" style="display: none;">
+                        <label class="form-label">Broker Priority Order</label>
+                        <div id="brokerOrderList">
+                            {% if config and config.broker_order %}
+                                {% for broker_id in config.broker_order %}
+                                    {% for broker in brokers %}
+                                        {% if broker.id == broker_id %}
+                                            <div class="d-flex align-items-center mb-2 broker-order-item">
+                                                <span class="badge bg-secondary me-2">{{ loop.index }}</span>
+                                                <span class="flex-grow-1">{{ broker.username }}</span>
+                                                <input type="hidden" name="broker_order" value="{{ broker.id }}">
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBrokerFromOrder(this)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-2">
+                            <select id="brokerSelect" class="form-select">
+                                <option value="">Select broker to add...</option>
+                                {% for broker in brokers %}
+                                    <option value="{{ broker.id }}">{{ broker.username }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addBrokerToOrder()">
+                                <i class="fas fa-plus me-1"></i>Add Broker
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="skip_inactive" id="skip_inactive" 
+                                   {{ 'checked' if config and config.skip_inactive }}>
+                            <label class="form-check-label" for="skip_inactive">
+                                Skip inactive brokers
+                            </label>
+                            <div class="form-text">
+                                Automatically skip brokers who are marked as inactive or cannot receive leads
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Configuration
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Brokers -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users me-2"></i>Available Brokers</h5>
+            </div>
+            <div class="card-body">
+                {% if brokers %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Broker</th>
+                                    <th>Status</th>
+                                    <th>Can Receive</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for broker in brokers %}
+                                    <tr>
+                                        <td>{{ broker.username }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if broker.is_active else 'danger' }}">
+                                                {{ 'Active' if broker.is_active else 'Inactive' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-{{ 'check text-success' if broker.can_receive_leads else 'times text-danger' }}"></i>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No brokers available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lead Assignment History -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history me-2"></i>Recent Lead Assignments</h5>
+            </div>
+            <div class="card-body">
+                {% if assignments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Lead</th>
+                                    <th>Broker</th>
+                                    <th>Assigned</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment, lead, broker in assignments %}
+                                    <tr>
+                                        <td>{{ lead.name }}</td>
+                                        <td>{{ broker.username }}</td>
+                                        <td>{{ assignment.assigned_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if lead.status.value == 'convertido' else 'warning' if lead.status.value == 'novo' else 'secondary' }}">
+                                                {{ lead.status.value.replace('_', ' ').title() }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No assignments found</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleManualOrder() {
+    const mode = document.getElementById('mode').value;
+    const section = document.getElementById('manualOrderSection');
+    
+    if (mode === 'manual') {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+}
+
+function addBrokerToOrder() {
+    const select = document.getElementById('brokerSelect');
+    const brokerId = select.value;
+    const brokerName = select.options[select.selectedIndex].text;
+    
+    if (!brokerId) return;
+    
+    // Check if broker already in list
+    const existingInputs = document.querySelectorAll('input[name="broker_order"]');
+    for (let input of existingInputs) {
+        if (input.value === brokerId) {
+            alert('Broker already in the order list');
+            return;
+        }
+    }
+    
+    // Add to list
+    const orderList = document.getElementById('brokerOrderList');
+    const orderNumber = orderList.children.length + 1;
+    
+    const brokerItem = document.createElement('div');
+    brokerItem.className = 'd-flex align-items-center mb-2 broker-order-item';
+    brokerItem.innerHTML = `
+        <span class="badge bg-secondary me-2">${orderNumber}</span>
+        <span class="flex-grow-1">${brokerName}</span>
+        <input type="hidden" name="broker_order" value="${brokerId}">
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeBrokerFromOrder(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    orderList.appendChild(brokerItem);
+    
+    // Reset select
+    select.value = '';
+    
+    updateOrderNumbers();
+}
+
+function removeBrokerFromOrder(button) {
+    const item = button.closest('.broker-order-item');
+    item.remove();
+    updateOrderNumbers();
+}
+
+function updateOrderNumbers() {
+    const items = document.querySelectorAll('.broker-order-item');
+    items.forEach((item, index) => {
+        const badge = item.querySelector('.badge');
+        badge.textContent = index + 1;
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleManualOrder();
+});
+</script>
+{% endblock %}

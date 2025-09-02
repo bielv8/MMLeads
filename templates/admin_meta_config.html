@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Meta API Configuration - Lead Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-cog me-2"></i>Meta API Configuration</h1>
+    <a href="{{ url_for('test_meta_connection') }}" class="btn btn-outline-info">
+        <i class="fas fa-plug me-2"></i>Test Connection
+    </a>
+</div>
+
+<div class="row">
+    <!-- Configuration Form -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-key me-2"></i>API Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('save_meta_config') }}">
+                    <div class="mb-3">
+                        <label for="api_token" class="form-label">API Token</label>
+                        <input type="password" class="form-control" name="api_token" 
+                               value="{{ config.api_token if config else '' }}" required>
+                        <div class="form-text">Your Meta Business API access token</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="app_secret" class="form-label">App Secret</label>
+                        <input type="password" class="form-control" name="app_secret" 
+                               value="{{ config.app_secret if config else '' }}" required>
+                        <div class="form-text">Your Meta App Secret</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="page_id" class="form-label">Page ID</label>
+                        <input type="text" class="form-control" name="page_id" 
+                               value="{{ config.page_id if config else '' }}" required>
+                        <div class="form-text">Your Facebook Page ID</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Configuration
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Status Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Integration Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Status:</strong>
+                        {% if config and config.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-6">
+                        <strong>Last Sync:</strong>
+                        {% if config and config.last_sync %}
+                            {{ config.last_sync.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            <span class="text-muted">Never</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Integration Logs -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list me-2"></i>Integration Logs</h5>
+            </div>
+            <div class="card-body">
+                {% if logs %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in logs %}
+                                    <tr>
+                                        <td class="text-nowrap">{{ log.created_at.strftime('%m/%d %H:%M') }}</td>
+                                        <td>{{ log.action }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if log.status == 'success' else 'danger' if log.status == 'error' else 'info' }}">
+                                                {{ log.status }}
+                                            </span>
+                                        </td>
+                                        <td class="text-truncate" style="max-width: 200px;" title="{{ log.message }}">
+                                            {{ log.message }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No logs available</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Help Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-question-circle me-2"></i>Setup Help</h5>
+            </div>
+            <div class="card-body">
+                <h6>To configure Meta Lead Ads integration:</h6>
+                <ol>
+                    <li>Go to Meta Business Manager</li>
+                    <li>Create or select your app</li>
+                    <li>Generate an access token with <code>leads_retrieval</code> permission</li>
+                    <li>Copy your App Secret from app settings</li>
+                    <li>Find your Page ID in Meta Business Manager</li>
+                    <li>Enter these values above and test the connection</li>
+                </ol>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> Your access token must have the <code>leads_retrieval</code> permission 
+                    and be associated with the correct Facebook Page.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Broker Dashboard - Lead Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-tachometer-alt me-2"></i>My Dashboard</h1>
+    <div class="text-muted">
+        Welcome back, {{ get_current_user().username }}!
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ total_leads }}</h3>
+                        <p class="card-text">Total Leads</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ new_leads }}</h3>
+                        <p class="card-text">New Leads</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ converted_leads }}</h3>
+                        <p class="card-text">Converted</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">
+                            {% if total_leads > 0 %}
+                                {{ "%.1f"|format(converted_leads / total_leads * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </h3>
+                        <p class="card-text">Conversion Rate</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-percentage fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('broker_leads') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-list me-2"></i>
+                            View All Leads
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('broker_leads', status='novo') }}" class="btn btn-warning w-100">
+                            <i class="fas fa-exclamation me-2"></i>
+                            New Leads ({{ new_leads }})
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('broker_leads', status='em_contato') }}" class="btn btn-info w-100">
+                            <i class="fas fa-phone me-2"></i>
+                            In Contact
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('broker_leads', status='convertido') }}" class="btn btn-success w-100">
+                            <i class="fas fa-check me-2"></i>
+                            Converted
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Leads -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock me-2"></i>Recent Leads</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_leads %}
+                    <div class="list-group">
+                        {% for lead in recent_leads %}
+                            <a href="{{ url_for('lead_detail', lead_id=lead.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ lead.name }}</h6>
+                                    <small>{{ lead.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1">{{ lead.email or 'No email' }}</p>
+                                <div class="d-flex justify-content-between">
+                                    <small>{{ lead.phone or 'No phone' }}</small>
+                                    <span class="badge bg-{{ 'success' if lead.status.value == 'convertido' else 'warning' if lead.status.value == 'novo' else 'secondary' }}">
+                                        {{ lead.status.value.replace('_', ' ').title() }}
+                                    </span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('broker_leads') }}" class="btn btn-outline-primary">
+                            View All Leads
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">No leads assigned yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upcoming Follow-ups -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-alt me-2"></i>Upcoming Follow-ups</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_followups %}
+                    <div class="list-group">
+                        {% for lead in upcoming_followups %}
+                            <a href="{{ url_for('lead_detail', lead_id=lead.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ lead.name }}</h6>
+                                    <small class="text-warning">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ lead.follow_up_date.strftime('%m/%d %H:%M') }}
+                                    </small>
+                                </div>
+                                <p class="mb-1 text-truncate">{{ lead.notes or 'No notes' }}</p>
+                                <small>{{ lead.phone or 'No phone' }}</small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-calendar-check fa-3x mb-3"></i><br>
+                        No upcoming follow-ups
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics - Lead Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chart-bar me-2"></i>Reports & Analytics</h1>
+    <div class="d-flex gap-2">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('admin_reports', days=7) }}" class="btn btn-outline-secondary {{ 'active' if days == 7 }}">7 Days</a>
+            <a href="{{ url_for('admin_reports', days=30) }}" class="btn btn-outline-secondary {{ 'active' if days == 30 }}">30 Days</a>
+            <a href="{{ url_for('admin_reports', days=90) }}" class="btn btn-outline-secondary {{ 'active' if days == 90 }}">90 Days</a>
+        </div>
+        <a href="{{ url_for('export_reports', days=days) }}" class="btn btn-success">
+            <i class="fas fa-download me-2"></i>Export CSV
+        </a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ total_leads }}</h3>
+                        <p class="card-text">Total Leads</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ converted_leads }}</h3>
+                        <p class="card-text">Converted</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ "%.1f"|format(conversion_rate) }}%</h3>
+                        <p class="card-text">Conversion Rate</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-percentage fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title">{{ days }}</h3>
+                        <p class="card-text">Days Period</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-calendar fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line me-2"></i>Daily Lead Trends</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="leadsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-trophy me-2"></i>Top Performers</h5>
+            </div>
+            <div class="card-body">
+                {% if broker_stats %}
+                    {% for stat in broker_stats[:5] %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ stat.username }}</span>
+                            <span class="badge bg-primary">{{ stat.converted or 0 }} conversions</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Broker Performance Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users me-2"></i>Broker Performance</h5>
+            </div>
+            <div class="card-body">
+                {% if broker_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Broker</th>
+                                    <th>Total Leads</th>
+                                    <th>Converted</th>
+                                    <th>Conversion Rate</th>
+                                    <th>Avg Response Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in broker_stats %}
+                                    <tr>
+                                        <td>{{ stat.username }}</td>
+                                        <td>{{ stat.total_leads or 0 }}</td>
+                                        <td>{{ stat.converted or 0 }}</td>
+                                        <td>
+                                            {% if stat.total_leads and stat.total_leads > 0 %}
+                                                {{ "%.1f"|format((stat.converted or 0) / stat.total_leads * 100) }}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if stat.avg_response_time %}
+                                                {{ "%.1f"|format(stat.avg_response_time / 3600) }}h
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No performance data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Daily Leads Chart
+const dailyLeadsData = {
+    labels: [
+        {% for daily in daily_leads %}
+            '{{ daily.date.strftime("%m/%d") }}'{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    datasets: [{
+        label: 'Daily Leads',
+        data: [
+            {% for daily in daily_leads %}
+                {{ daily.count }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        borderColor: '#007bff',
+        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        tension: 0.4,
+        fill: true
+    }]
+};
+
+const leadsChart = new Chart(document.getElementById('leadsChart'), {
+    type: 'line',
+    data: dailyLeadsData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}My Leads - Lead Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-list me-2"></i>My Leads</h1>
+    <div class="d-flex gap-2">
+        <!-- Status Filter -->
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('broker_leads') }}" class="btn btn-outline-secondary {{ 'active' if not current_status }}">
+                All
+            </a>
+            <a href="{{ url_for('broker_leads', status='novo') }}" class="btn btn-outline-warning {{ 'active' if current_status == 'novo' }}">
+                New
+            </a>
+            <a href="{{ url_for('broker_leads', status='em_contato') }}" class="btn btn-outline-info {{ 'active' if current_status == 'em_contato' }}">
+                In Contact
+            </a>
+            <a href="{{ url_for('broker_leads', status='convertido') }}" class="btn btn-outline-success {{ 'active' if current_status == 'convertido' }}">
+                Converted
+            </a>
+            <a href="{{ url_for('broker_leads', status='perdido') }}" class="btn btn-outline-danger {{ 'active' if current_status == 'perdido' }}">
+                Lost
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Leads Table -->
+<div class="card">
+    <div class="card-body">
+        {% if leads %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Received</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lead in leads %}
+                            <tr class="{{ 'table-warning' if lead.status.value == 'novo' else '' }}">
+                                <td>
+                                    <strong>{{ lead.name }}</strong>
+                                    {% if lead.follow_up_date and lead.follow_up_date <= moment.utcnow() + timedelta(hours=1) %}
+                                        <i class="fas fa-bell text-warning ms-2" title="Follow-up due soon"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ lead.email or '-' }}</td>
+                                <td>{{ lead.phone or '-' }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if lead.status.value == 'convertido' else 'warning' if lead.status.value == 'novo' else 'info' if lead.status.value == 'em_contato' else 'danger' }}">
+                                        {{ lead.status.value.replace('_', ' ').title() }}
+                                    </span>
+                                </td>
+                                <td>{{ lead.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ lead.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <a href="{{ url_for('lead_detail', lead_id=lead.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No leads found</h4>
+                <p class="text-muted">
+                    {% if current_status %}
+                        No leads with status "{{ current_status.replace('_', ' ').title() }}" found.
+                    {% else %}
+                        You haven't been assigned any leads yet.
+                    {% endif %}
+                </p>
+                <a href="{{ url_for('broker_leads') }}" class="btn btn-primary">
+                    <i class="fas fa-refresh me-2"></i>View All Leads
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Lead Statistics -->
+{% if leads %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h5>{{ leads|length }}</h5>
+                            <small class="text-muted">
+                                {% if current_status %}
+                                    {{ current_status.replace('_', ' ').title() }} Leads
+                                {% else %}
+                                    Total Leads
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>{{ leads|selectattr('status.value', 'equalto', 'novo')|list|length }}</h5>
+                            <small class="text-muted">New</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>{{ leads|selectattr('status.value', 'equalto', 'em_contato')|list|length }}</h5>
+                            <small class="text-muted">In Contact</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>{{ leads|selectattr('status.value', 'equalto', 'convertido')|list|length }}</h5>
+                            <small class="text-muted">Converted</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
