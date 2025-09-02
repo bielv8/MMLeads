@@ -17,11 +17,11 @@ db = SQLAlchemy(model_class=Base)
 
 # Create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET")
+app.secret_key = os.environ.get("SESSION_SECRET", "fallback_secret_key_for_development_only_change_in_production")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # JWT Configuration
-app.config["JWT_SECRET_KEY"] = os.environ.get("SESSION_SECRET")
+app.config["JWT_SECRET_KEY"] = os.environ.get("SESSION_SECRET", "fallback_jwt_secret_key_for_development_only_change_in_production")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 jwt = JWTManager(app)
 

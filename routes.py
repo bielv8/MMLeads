@@ -8,7 +8,7 @@ from models import (User, Lead, LeadAssignment, MetaConfig, DistributionConfig,
 from auth import login_required, admin_required, get_current_user
 from meta_integration import MetaLeadsIntegration
 from lead_distributor import LeadDistributor
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, or_
 
 @app.route('/')
 def index():

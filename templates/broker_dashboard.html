@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Broker Dashboard - Lead Management System{% endblock %}
+{% block title %}Painel do Corretor - MM Conecta Leads{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-tachometer-alt me-2"></i>My Dashboard</h1>
+    <h1><i class="fas fa-tachometer-alt me-2"></i>Meu Painel</h1>
     <div class="text-muted">
-        Welcome back, {{ get_current_user().username }}!
+        Bem-vindo de volta, {{ get_current_user().username }}!
     </div>
 </div>
 
@@ -18,7 +18,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ total_leads }}</h3>
-                        <p class="card-text">Total Leads</p>
+                        <p class="card-text">Total de Leads</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-users fa-2x"></i>
@@ -34,7 +34,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ new_leads }}</h3>
-                        <p class="card-text">New Leads</p>
+                        <p class="card-text">Novos Leads</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-exclamation-circle fa-2x"></i>
@@ -50,7 +50,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h3 class="card-title">{{ converted_leads }}</h3>
-                        <p class="card-text">Converted</p>
+                        <p class="card-text">Convertidos</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-check-circle fa-2x"></i>
@@ -72,7 +72,7 @@
                                 0%
                             {% endif %}
                         </h3>
-                        <p class="card-text">Conversion Rate</p>
+                        <p class="card-text">Taxa de Conversão</p>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-percentage fa-2x"></i>
@@ -88,7 +88,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                <h5><i class="fas fa-bolt me-2"></i>Ações Rápidas</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -101,19 +101,19 @@
                     <div class="col-md-3 mb-3">
                         <a href="{{ url_for('broker_leads', status='novo') }}" class="btn btn-warning w-100">
                             <i class="fas fa-exclamation me-2"></i>
-                            New Leads ({{ new_leads }})
+                            Novos Leads ({{ new_leads }})
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{{ url_for('broker_leads', status='em_contato') }}" class="btn btn-info w-100">
                             <i class="fas fa-phone me-2"></i>
-                            In Contact
+                            Em Contato
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
                         <a href="{{ url_for('broker_leads', status='convertido') }}" class="btn btn-success w-100">
                             <i class="fas fa-check me-2"></i>
-                            Converted
+                            Convertidos
                         </a>
                     </div>
                 </div>
@@ -127,7 +127,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-clock me-2"></i>Recent Leads</h5>
+                <h5><i class="fas fa-clock me-2"></i>Leads Recentes</h5>
             </div>
             <div class="card-body">
                 {% if recent_leads %}
@@ -138,9 +138,9 @@
                                     <h6 class="mb-1">{{ lead.name }}</h6>
                                     <small>{{ lead.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
                                 </div>
-                                <p class="mb-1">{{ lead.email or 'No email' }}</p>
+                                <p class="mb-1">{{ lead.email or 'Sem email' }}</p>
                                 <div class="d-flex justify-content-between">
-                                    <small>{{ lead.phone or 'No phone' }}</small>
+                                    <small>{{ lead.phone or 'Sem telefone' }}</small>
                                     <span class="badge bg-{{ 'success' if lead.status.value == 'convertido' else 'warning' if lead.status.value == 'novo' else 'secondary' }}">
                                         {{ lead.status.value.replace('_', ' ').title() }}
                                     </span>
@@ -154,7 +154,7 @@
                         </a>
                     </div>
                 {% else %}
-                    <p class="text-muted text-center py-4">No leads assigned yet</p>
+                    <p class="text-muted text-center py-4">Nenhum lead atribuído ainda</p>
                 {% endif %}
             </div>
         </div>
@@ -164,7 +164,7 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-calendar-alt me-2"></i>Upcoming Follow-ups</h5>
+                <h5><i class="fas fa-calendar-alt me-2"></i>Próximos Follow-ups</h5>
             </div>
             <div class="card-body">
                 {% if upcoming_followups %}
@@ -178,15 +178,15 @@
                                         {{ lead.follow_up_date.strftime('%m/%d %H:%M') }}
                                     </small>
                                 </div>
-                                <p class="mb-1 text-truncate">{{ lead.notes or 'No notes' }}</p>
-                                <small>{{ lead.phone or 'No phone' }}</small>
+                                <p class="mb-1 text-truncate">{{ lead.notes or 'Sem observações' }}</p>
+                                <small>{{ lead.phone or 'Sem telefone' }}</small>
                             </a>
                         {% endfor %}
                     </div>
                 {% else %}
                     <p class="text-muted text-center py-4">
                         <i class="fas fa-calendar-check fa-3x mb-3"></i><br>
-                        No upcoming follow-ups
+                        Nenhum follow-up próximo
                     </p>
                 {% endif %}
             </div>

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}User Management - Lead Management System{% endblock %}
+{% block title %}Gerenciamento de Usuários - MM Conecta Leads{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="fas fa-users me-2"></i>User Management</h1>
+    <h1><i class="fas fa-users me-2"></i>Gerenciamento de Usuários</h1>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
-        <i class="fas fa-plus me-2"></i>Add User
+        <i class="fas fa-plus me-2"></i>Adicionar Usuário
     </button>
 </div>
 
@@ -17,13 +17,13 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Username</th>
+                        <th>Usuário</th>
                         <th>Email</th>
                         <th>Status</th>
-                        <th>Can Receive Leads</th>
-                        <th>Can Access Reports</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th>Pode Receber Leads</th>
+                        <th>Pode Acessar Relatórios</th>
+                        <th>Criado</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,7 +33,7 @@
                             <td>{{ user.email }}</td>
                             <td>
                                 <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
-                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                    {{ 'Ativo' if user.is_active else 'Inativo' }}
                                 </span>
                             </td>
                             <td>
@@ -49,7 +49,7 @@
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" 
-                                      class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                      class="d-inline" onsubmit="return confirm('Tem certeza?')">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -58,7 +58,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No users found</td>
+                            <td colspan="7" class="text-center text-muted">Nenhum usuário encontrado</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -73,12 +73,12 @@
         <div class="modal-content">
             <form method="POST" action="{{ url_for('create_user') }}">
                 <div class="modal-header">
-                    <h5 class="modal-title">Create New User</h5>
+                    <h5 class="modal-title">Criar Novo Usuário</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
+                        <label for="username" class="form-label">Usuário</label>
                         <input type="text" class="form-control" name="username" required>
                     </div>
                     <div class="mb-3">
@@ -86,7 +86,7 @@
                         <input type="email" class="form-control" name="email" required>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
+                        <label for="password" class="form-label">Senha</label>
                         <input type="password" class="form-control" name="password" required>
                     </div>
                     <div class="mb-3">
@@ -107,8 +107,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create User</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Usuário</button>
                 </div>
             </form>
         </div>
@@ -121,12 +121,12 @@
         <div class="modal-content">
             <form method="POST" id="editUserForm">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit User</h5>
+                    <h5 class="modal-title">Editar Usuário</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="edit_username" class="form-label">Username</label>
+                        <label for="edit_username" class="form-label">Usuário</label>
                         <input type="text" class="form-control" id="edit_username" readonly>
                     </div>
                     <div class="mb-3">
@@ -134,14 +134,14 @@
                         <input type="email" class="form-control" name="email" id="edit_email" required>
                     </div>
                     <div class="mb-3">
-                        <label for="edit_password" class="form-label">New Password (leave empty to keep current)</label>
+                        <label for="edit_password" class="form-label">Nova Senha (deixe vazio para manter atual)</label>
                         <input type="password" class="form-control" name="password" id="edit_password">
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="is_active" id="edit_is_active">
                             <label class="form-check-label" for="edit_is_active">
-                                Active
+                                Ativo
                             </label>
                         </div>
                     </div>
@@ -163,8 +163,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update User</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Atualizar Usuário</button>
                 </div>
             </form>
         </div>
