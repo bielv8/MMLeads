@@ -237,7 +237,9 @@ def admin_distribution():
     # Get lead assignment history
     assignments = db.session.query(
         LeadAssignment, Lead, User
-    ).join(Lead).join(User).order_by(desc(LeadAssignment.assigned_at)).limit(20).all()
+    ).join(Lead, LeadAssignment.lead_id == Lead.id)\
+     .join(User, LeadAssignment.broker_id == User.id)\
+     .order_by(desc(LeadAssignment.assigned_at)).limit(20).all()
     
     return render_template('admin_distribution.html', 
                          config=config, 
@@ -290,7 +292,7 @@ def admin_reports():
             func.extract('epoch', Lead.updated_at) - func.extract('epoch', Lead.created_at)
         ).label('avg_response_time')
     ).select_from(User)\
-     .join(Lead, User.id == Lead.assigned_to, isouter=True)\
+     .outerjoin(Lead, User.id == Lead.assigned_to)\
      .filter(User.role == UserRole.BROKER)\
      .filter(or_(Lead.created_at >= start_date, Lead.created_at.is_(None)))\
      .group_by(User.id, User.username).all()
@@ -328,7 +330,7 @@ def export_reports():
         func.sum(func.case([(Lead.status == LeadStatus.CONVERTIDO, 1)], else_=0)).label('converted'),
         func.sum(func.case([(Lead.status == LeadStatus.PERDIDO, 1)], else_=0)).label('lost')
     ).select_from(User)\
-     .join(Lead, User.id == Lead.assigned_to, isouter=True)\
+     .outerjoin(Lead, User.id == Lead.assigned_to)\
      .filter(User.role == UserRole.BROKER)\
      .filter(or_(Lead.created_at >= start_date, Lead.created_at.is_(None)))\
      .group_by(User.id, User.username, User.email).all()
