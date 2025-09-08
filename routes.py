@@ -586,3 +586,191 @@ def meta_webhook():
         print(f"[META WEBHOOK] Received lead data: {data}")
         
         return "OK", 200
+
+@app.route('/webhook/whatsapp', methods=['GET', 'POST'])
+def whatsapp_webhook():
+    """
+    WhatsApp Business API webhook endpoint
+    GET: Used by WhatsApp to validate the webhook
+    POST: Used by WhatsApp to send message data (including leads)
+    """
+    if request.method == 'GET':
+        # Webhook verification for WhatsApp
+        verify_token = request.args.get('hub.verify_token')
+        challenge = request.args.get('hub.challenge')
+        
+        config = WhatsAppConfig.query.first()
+        expected_token = config.verify_token if config else "whatsapp_verify_token_123"
+        
+        if verify_token == expected_token:
+            app.logger.info("WhatsApp webhook validation successful")
+            return challenge
+        else:
+            app.logger.warning(f"WhatsApp webhook validation failed. Received token: {verify_token}")
+            return "Forbidden", 403
+    
+    elif request.method == 'POST':
+        # Receive message data from WhatsApp
+        data = request.get_json()
+        app.logger.info(f"Received WhatsApp webhook data: {data}")
+        
+        try:
+            # Process WhatsApp message and extract lead information
+            lead_created = process_whatsapp_message(data)
+            
+            if lead_created:
+                print(f"[WHATSAPP WEBHOOK] New lead created from WhatsApp message")
+            else:
+                print(f"[WHATSAPP WEBHOOK] Message processed but no lead created")
+                
+        except Exception as e:
+            app.logger.error(f"Error processing WhatsApp webhook: {str(e)}")
+            print(f"[WHATSAPP WEBHOOK] Error: {str(e)}")
+        
+        return "OK", 200
+
+def process_whatsapp_message(webhook_data):
+    """
+    Process WhatsApp webhook data and create lead if it's a new conversation
+    Returns True if a lead was created, False otherwise
+    """
+    try:
+        if not webhook_data.get('entry'):
+            return False
+        
+        for entry in webhook_data['entry']:
+            if not entry.get('changes'):
+                continue
+                
+            for change in entry['changes']:
+                if change.get('field') != 'messages':
+                    continue
+                    
+                value = change.get('value', {})
+                messages = value.get('messages', [])
+                
+                for message in messages:
+                    # Extract contact information
+                    from_number = message.get('from')
+                    contact_info = get_whatsapp_contact_info(value, from_number)
+                    
+                    if contact_info and is_new_conversation(from_number):
+                        # Create lead from WhatsApp contact
+                        lead = create_lead_from_whatsapp(contact_info, message)
+                        if lead:
+                            # Distribute lead to broker
+                            distribute_whatsapp_lead(lead)
+                            return True
+        
+        return False
+        
+    except Exception as e:
+        app.logger.error(f"Error in process_whatsapp_message: {str(e)}")
+        return False
+
+def get_whatsapp_contact_info(value, from_number):
+    """Extract contact information from WhatsApp webhook data"""
+    try:
+        contacts = value.get('contacts', [])
+        for contact in contacts:
+            if contact.get('wa_id') == from_number:
+                profile = contact.get('profile', {})
+                return {
+                    'phone': from_number,
+                    'name': profile.get('name', f'Contato {from_number}'),
+                    'wa_id': from_number
+                }
+        
+        # If no contact info found, create basic info from number
+        return {
+            'phone': from_number,
+            'name': f'Contato {from_number}',
+            'wa_id': from_number
+        }
+        
+    except Exception as e:
+        app.logger.error(f"Error extracting contact info: {str(e)}")
+        return None
+
+def is_new_conversation(phone_number):
+    """Check if this is a new conversation (no existing leads from this number in last 24h)"""
+    try:
+        recent_threshold = datetime.utcnow() - timedelta(hours=24)
+        existing_lead = Lead.query.filter(
+            Lead.phone == phone_number,
+            Lead.created_at >= recent_threshold
+        ).first()
+        
+        return existing_lead is None
+        
+    except Exception as e:
+        app.logger.error(f"Error checking conversation status: {str(e)}")
+        return True  # Default to creating lead if check fails
+
+def create_lead_from_whatsapp(contact_info, message):
+    """Create a new lead from WhatsApp contact information"""
+    try:
+        lead = Lead()
+        lead.name = contact_info['name']
+        lead.phone = contact_info['phone']
+        lead.message = f"Mensagem via WhatsApp: {message.get('text', {}).get('body', 'Conversa iniciada')}"
+        lead.status = LeadStatus.NOVO
+        
+        db.session.add(lead)
+        db.session.commit()
+        
+        # Log lead creation
+        log = IntegrationLog()
+        log.action = 'whatsapp_lead_created'
+        log.status = 'success'
+        log.message = f'Lead criado do WhatsApp: {contact_info["name"]} ({contact_info["phone"]})'
+        db.session.add(log)
+        db.session.commit()
+        
+        app.logger.info(f"Lead created from WhatsApp: {lead.id}")
+        return lead
+        
+    except Exception as e:
+        app.logger.error(f"Error creating lead from WhatsApp: {str(e)}")
+        db.session.rollback()
+        return None
+
+def distribute_whatsapp_lead(lead):
+    """Distribute WhatsApp lead to available broker using existing distribution system"""
+    try:
+        lead_distributor_instance = LeadDistributor()
+        broker = lead_distributor_instance.get_next_broker()
+        
+        if broker:
+            lead_distributor_instance.assign_lead_to_broker(lead, broker)
+            
+            # Log distribution
+            log = IntegrationLog()
+            log.action = 'whatsapp_lead_distributed'
+            log.status = 'success'
+            log.message = f'Lead {lead.id} distribuído para corretor {broker.username}'
+            db.session.add(log)
+            db.session.commit()
+            
+            app.logger.info(f"WhatsApp lead {lead.id} distributed to broker {broker.username}")
+        else:
+            # Log no broker available
+            log = IntegrationLog()
+            log.action = 'whatsapp_lead_distribution_failed'
+            log.status = 'error'
+            log.message = f'Nenhum corretor disponível para lead {lead.id}'
+            db.session.add(log)
+            db.session.commit()
+            
+            app.logger.warning(f"No broker available for WhatsApp lead {lead.id}")
+            
+    except Exception as e:
+        app.logger.error(f"Error distributing WhatsApp lead: {str(e)}")
+        
+        # Log error
+        log = IntegrationLog()
+        log.action = 'whatsapp_lead_distribution_error'
+        log.status = 'error'
+        log.message = f'Erro ao distribuir lead {lead.id}: {str(e)}'
+        db.session.add(log)
+        db.session.commit()
