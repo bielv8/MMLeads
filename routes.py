@@ -2,7 +2,6 @@ from flask import render_template, request, redirect, url_for, flash, session, j
 from datetime import datetime, timedelta
 import csv
 import io
-import logging
 from app import app, db
 from models import (User, Lead, LeadAssignment, MetaConfig, DistributionConfig, 
                    IntegrationLog, UserRole, LeadStatus, DistributionMode)
@@ -10,9 +9,6 @@ from auth import login_required, admin_required, get_current_user
 from meta_integration import MetaLeadsIntegration
 from lead_distributor import LeadDistributor
 from sqlalchemy import func, desc, or_, case
-
-# Meta Webhook Configuration
-VERIFY_TOKEN = "mmleads_secret_123"
 
 @app.route('/')
 def index():
@@ -53,31 +49,6 @@ def logout():
     session.clear()
     flash('Você foi desconectado', 'info')
     return redirect(url_for('login'))
-
-# Meta Webhook Routes
-@app.route('/webhook/meta', methods=['GET', 'POST'])
-def meta_webhook():
-    """Meta (Facebook) webhook endpoint for lead integration"""
-    
-    if request.method == 'GET':
-        # Webhook verification (used by Meta to validate the endpoint)
-        verify_token = request.args.get('hub.verify_token')
-        challenge = request.args.get('hub.challenge')
-        
-        if verify_token == VERIFY_TOKEN:
-            return challenge
-        return "Forbidden", 403
-    
-    # POST method
-    data = request.get_json()
-    
-    # Log the received data
-    print(f"=== META WEBHOOK DATA ===")
-    print(f"Timestamp: {datetime.now()}")
-    print(f"Data: {data}")
-    print(f"========================")
-    
-    return '{"status":"success"}'
 
 # Admin Routes
 @app.route('/admin')
