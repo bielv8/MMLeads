@@ -4,7 +4,7 @@ import csv
 import io
 from app import app, db
 from models import (User, Lead, LeadAssignment, MetaConfig, DistributionConfig, 
-                   IntegrationLog, UserRole, LeadStatus, DistributionMode)
+                   IntegrationLog, WhatsAppConfig, UserRole, LeadStatus, DistributionMode)
 from auth import login_required, admin_required, get_current_user
 from meta_integration import MetaLeadsIntegration
 from lead_distributor import LeadDistributor
@@ -225,6 +225,79 @@ def test_meta_connection():
         flash(f'Falha na conexão: {message}', 'danger')
     
     return redirect(url_for('admin_meta_config'))
+
+# WhatsApp Business Configuration Routes
+@app.route('/admin/whatsapp-config')
+@admin_required
+def admin_whatsapp_config():
+    """WhatsApp Business configuration page"""
+    config = WhatsAppConfig.query.first()
+    logs = IntegrationLog.query.filter_by(action='whatsapp').order_by(desc(IntegrationLog.created_at)).limit(10).all()
+    
+    return render_template('admin_whatsapp_config.html', config=config, logs=logs)
+
+@app.route('/admin/whatsapp-config/save', methods=['POST'])
+@admin_required  
+def save_whatsapp_config():
+    """Save WhatsApp Business configuration"""
+    try:
+        config = WhatsAppConfig.query.first()
+        if not config:
+            config = WhatsAppConfig()
+            db.session.add(config)
+        
+        config.access_token = request.form['access_token']
+        config.phone_number_id = request.form['phone_number_id']
+        config.verify_token = request.form['verify_token']
+        config.app_secret = request.form.get('app_secret', '')
+        config.webhook_url = f"{request.url_root}webhook/whatsapp"
+        config.is_active = True
+        config.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        flash('Configuração do WhatsApp salva com sucesso', 'success')
+        
+    except Exception as e:
+        flash(f'Erro ao salvar configuração: {str(e)}', 'danger')
+        db.session.rollback()
+    
+    return redirect(url_for('admin_whatsapp_config'))
+
+@app.route('/admin/whatsapp-config/test')
+@admin_required
+def test_whatsapp_connection():
+    """Test WhatsApp Business API connection"""
+    try:
+        config = WhatsAppConfig.query.first()
+        if not config or not config.access_token:
+            flash('Configure o WhatsApp Business primeiro', 'warning')
+            return redirect(url_for('admin_whatsapp_config'))
+        
+        # Test API connection with a simple health check
+        import requests
+        
+        url = f"https://graph.facebook.com/v18.0/{config.phone_number_id}"
+        headers = {'Authorization': f'Bearer {config.access_token}'}
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            flash('Conexão WhatsApp Business testada com sucesso!', 'success')
+            
+            # Log successful test
+            log = IntegrationLog()
+            log.action = 'whatsapp_test'
+            log.status = 'success'
+            log.message = 'Teste de conexão bem-sucedido'
+            db.session.add(log)
+            db.session.commit()
+        else:
+            flash(f'Falha no teste de conexão: {response.status_code}', 'danger')
+            
+    except Exception as e:
+        flash(f'Erro ao testar conexão: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin_whatsapp_config'))
 
 @app.route('/admin/distribution')
 @admin_required

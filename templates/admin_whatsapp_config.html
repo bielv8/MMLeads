@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Configuração WhatsApp Business - MM Conecta Leads{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-whatsapp me-2"></i>Configuração WhatsApp Business</h1>
+    <a href="{{ url_for('test_whatsapp_connection') }}" class="btn btn-outline-success">
+        <i class="fas fa-plug me-2"></i>Testar Conexão
+    </a>
+</div>
+
+<div class="row">
+    <!-- Configuration Form -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-key me-2"></i>Configuração da API WhatsApp</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('save_whatsapp_config') }}">
+                    <div class="mb-3">
+                        <label for="access_token" class="form-label">Access Token</label>
+                        <input type="password" class="form-control" name="access_token" 
+                               value="{{ config.access_token if config else '' }}" required>
+                        <div class="form-text">Seu token de acesso da API WhatsApp Business</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone_number_id" class="form-label">Phone Number ID</label>
+                        <input type="text" class="form-control" name="phone_number_id" 
+                               value="{{ config.phone_number_id if config else '' }}" required>
+                        <div class="form-text">ID do número de telefone do WhatsApp Business</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="verify_token" class="form-label">Verify Token</label>
+                        <input type="text" class="form-control" name="verify_token" 
+                               value="{{ config.verify_token if config else 'whatsapp_verify_token_123' }}">
+                        <div class="form-text">Token para verificação do webhook</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="app_secret" class="form-label">App Secret</label>
+                        <input type="password" class="form-control" name="app_secret" 
+                               value="{{ config.app_secret if config else '' }}">
+                        <div class="form-text">App Secret do WhatsApp Business (opcional)</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>Salvar Configuração
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Status Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Status da Integração</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Status:</strong>
+                        {% if config and config.is_active %}
+                            <span class="badge bg-success">Ativo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inativo</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-6">
+                        <strong>Última Sincronização:</strong>
+                        {% if config and config.last_sync %}
+                            {{ config.last_sync.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            <span class="text-muted">Nunca</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if config and config.webhook_url %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <strong>Webhook URL:</strong>
+                        <code>{{ config.webhook_url }}</code>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Instructions -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-book me-2"></i>Como Configurar</h5>
+            </div>
+            <div class="card-body">
+                <h6>1. Criar App no Meta for Developers</h6>
+                <p>Acesse <a href="https://developers.facebook.com/" target="_blank">Meta for Developers</a> e crie um novo app com WhatsApp Business API.</p>
+                
+                <h6>2. Obter Access Token</h6>
+                <p>No painel do seu app, vá para WhatsApp > API Setup e copie o token temporário ou configure um token permanente.</p>
+                
+                <h6>3. Obter Phone Number ID</h6>
+                <p>Na seção WhatsApp > API Setup, copie o Phone Number ID do número que deseja usar.</p>
+                
+                <h6>4. Configurar Webhook</h6>
+                <p>Na seção WhatsApp > Configuration, configure o webhook com:</p>
+                <ul>
+                    <li><strong>URL:</strong> <code>{{ request.url_root }}webhook/whatsapp</code></li>
+                    <li><strong>Verify Token:</strong> <code>whatsapp_verify_token_123</code></li>
+                </ul>
+                
+                <h6>5. Subscrever a eventos</h6>
+                <p>Marque as seguintes opções:</p>
+                <ul>
+                    <li>messages</li>
+                    <li>message_status</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-route me-2"></i>Distribuição de Leads</h5>
+            </div>
+            <div class="card-body">
+                <p>Os leads recebidos pelo WhatsApp serão automaticamente distribuídos para os corretores usando as mesmas regras configuradas para os leads do Meta.</p>
+                
+                <p><strong>Configurações de distribuição:</strong></p>
+                <a href="{{ url_for('admin_distribution') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-share-alt me-1"></i>Configurar Distribuição
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if logs %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h5><i class="fas fa-list me-2"></i>Logs de Integração (Últimos 10)</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Ação</th>
+                        <th>Status</th>
+                        <th>Mensagem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>
+                            {% if log.status == 'success' %}
+                                <span class="badge bg-success">Sucesso</span>
+                            {% elif log.status == 'error' %}
+                                <span class="badge bg-danger">Erro</span>
+                            {% else %}
+                                <span class="badge bg-info">Info</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.message }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
