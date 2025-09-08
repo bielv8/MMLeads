@@ -4,6 +4,11 @@ import routes  # noqa: F401
 import scheduler
 
 if __name__ == "__main__":
+    # Initialize database for local development
+    from app import init_database
+    with app.app_context():
+        init_database()
+    
     # Start the background scheduler for Meta API sync
     scheduler.start_scheduler()
     

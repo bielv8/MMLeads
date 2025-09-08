@@ -2,7 +2,9 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "gunicorn main:app --bind 0.0.0.0:$PORT"
+startCommand = "gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1"
 
 [variables]
 PORT = "$PORT"
+FLASK_ENV = "production"
+FLASK_DEBUG = "false"
