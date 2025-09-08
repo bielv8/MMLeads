@@ -95,6 +95,20 @@ class DistributionConfig(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class WhatsAppConfig(db.Model):
+    __tablename__ = 'whatsapp_config'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    access_token = db.Column(db.Text, nullable=True)
+    phone_number_id = db.Column(db.String(256), nullable=True)
+    verify_token = db.Column(db.String(256), nullable=True)
+    app_secret = db.Column(db.String(256), nullable=True)
+    is_active = db.Column(db.Boolean, default=False)
+    webhook_url = db.Column(db.String(512), nullable=True)
+    last_sync = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class IntegrationLog(db.Model):
     __tablename__ = 'integration_logs'
     
