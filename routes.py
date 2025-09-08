@@ -61,33 +61,23 @@ def meta_webhook():
     
     if request.method == 'GET':
         # Webhook verification (used by Meta to validate the endpoint)
-        hub_verify_token = request.args.get('hub.verify_token')
-        hub_challenge = request.args.get('hub.challenge')
+        verify_token = request.args.get('hub.verify_token')
+        challenge = request.args.get('hub.challenge')
         
-        if hub_verify_token == VERIFY_TOKEN and hub_challenge:
-            logging.info("Meta webhook verification successful")
-            return str(hub_challenge)
-        else:
-            logging.warning(f"Meta webhook verification failed. Token: {hub_verify_token}")
-            return make_response("Forbidden", 403)
+        if verify_token == VERIFY_TOKEN:
+            return challenge
+        return "Forbidden", 403
     
-    else:  # POST method
-        # Lead data received from Meta
-        try:
-            data = request.get_json()
-            
-            # Log the received data
-            logging.info(f"Meta webhook received data: {data}")
-            print(f"=== META WEBHOOK DATA ===")
-            print(f"Timestamp: {datetime.now()}")
-            print(f"Data: {data}")
-            print(f"========================")
-            
-            # Return 200 OK to acknowledge receipt
-            return jsonify({"status": "success"})
-        except Exception as e:
-            logging.error(f"Error processing webhook data: {e}")
-            return jsonify({"status": "error", "message": str(e)}), 400
+    # POST method
+    data = request.get_json()
+    
+    # Log the received data
+    print(f"=== META WEBHOOK DATA ===")
+    print(f"Timestamp: {datetime.now()}")
+    print(f"Data: {data}")
+    print(f"========================")
+    
+    return '{"status":"success"}'
 
 # Admin Routes
 @app.route('/admin')
