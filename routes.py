@@ -481,3 +481,36 @@ def get_notifications():
             })
     
     return jsonify(notifications)
+
+# Meta Webhook Configuration
+VERIFY_TOKEN = "mmleads_secret_123"
+
+@app.route('/webhook/meta', methods=['GET', 'POST'])
+def meta_webhook():
+    """
+    Meta (Facebook) Leads API webhook endpoint
+    GET: Used by Meta to validate the webhook
+    POST: Used by Meta to send lead data
+    """
+    if request.method == 'GET':
+        # Webhook verification for Meta
+        verify_token = request.args.get('hub.verify_token')
+        challenge = request.args.get('hub.challenge')
+        
+        if verify_token == VERIFY_TOKEN:
+            app.logger.info("Meta webhook validation successful")
+            return challenge
+        else:
+            app.logger.warning(f"Meta webhook validation failed. Received token: {verify_token}")
+            return "Forbidden", 403
+    
+    elif request.method == 'POST':
+        # Receive lead data from Meta
+        data = request.get_json()
+        app.logger.info(f"Received Meta webhook data: {data}")
+        
+        # TODO: Process the lead data and save to database
+        # For now, just log and return 200 OK
+        print(f"[META WEBHOOK] Received lead data: {data}")
+        
+        return "OK", 200
