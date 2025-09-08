@@ -108,10 +108,9 @@ class LeadDistributor:
             lead.assigned_to = broker.id
             
             # Create assignment record
-            assignment = LeadAssignment(
-                lead_id=lead.id,
-                broker_id=broker.id
-            )
+            assignment = LeadAssignment()
+            assignment.lead_id = lead.id
+            assignment.broker_id = broker.id
             
             db.session.add(assignment)
             db.session.commit()

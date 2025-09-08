@@ -107,13 +107,12 @@ def create_user():
             flash('Email já existe', 'danger')
             return redirect(url_for('admin_users'))
         
-        user = User(
-            username=username,
-            email=email,
-            role=UserRole.BROKER,
-            can_receive_leads=can_receive_leads,
-            can_access_reports=can_access_reports
-        )
+        user = User()
+        user.username = username
+        user.email = email
+        user.role = UserRole.BROKER
+        user.can_receive_leads = can_receive_leads
+        user.can_access_reports = can_access_reports
         user.set_password(password)
         
         db.session.add(user)

@@ -45,14 +45,13 @@ with app.app_context():
     from models import User, UserRole
     admin_user = User.query.filter_by(role=UserRole.ADMIN).first()
     if not admin_user:
-        admin = User(
-            username='admin',
-            email='admin@example.com',
-            role=UserRole.ADMIN,
-            is_active=True,
-            can_receive_leads=False,
-            can_access_reports=True
-        )
+        admin = User()
+        admin.username = 'admin'
+        admin.email = 'admin@example.com'
+        admin.role = UserRole.ADMIN
+        admin.is_active = True
+        admin.can_receive_leads = False
+        admin.can_access_reports = True
         admin.set_password('admin123')
         db.session.add(admin)
         db.session.commit()

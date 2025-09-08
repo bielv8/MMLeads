@@ -100,13 +100,12 @@ class MetaLeadsIntegration:
                         lead_info = self.parse_lead_data(lead_data)
                         if lead_info:
                             # Create new lead
-                            lead = Lead(
-                                meta_lead_id=lead_data['id'],
-                                name=lead_info.get('name', 'Unknown'),
-                                email=lead_info.get('email'),
-                                phone=lead_info.get('phone'),
-                                message=lead_info.get('message', '')
-                            )
+                            lead = Lead()
+                            lead.meta_lead_id = lead_data['id']
+                            lead.name = lead_info.get('name', 'Unknown')
+                            lead.email = lead_info.get('email')
+                            lead.phone = lead_info.get('phone')
+                            lead.message = lead_info.get('message', '')
                             
                             db.session.add(lead)
                             all_leads.append(lead)
